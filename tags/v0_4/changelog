@@ -1,0 +1,24 @@
+changelog for pam_pwdfile PAM module - Charl P. Botha <cpbotha@ieee.org>
+$Id: changelog,v 1.3 2000-08-29 07:24:00 cpbotha Exp $
+---------------------------------------------------------------------------
+
+0.4: Tue Aug 29 09:23:23 SAST 2000
+
+* fixed typo in INSTALL (thanks to Quynh Nguyen Anh <quynhna@hotmail.com>)
+
+0.3: Mon Aug 28 09:49:27 SAST 2000
+
+* INSTALL file created.  This explains how to get pam_pwdfile compiled from
+  scratch.
+
+0.2: Mon May 22 22:41:30 SAST 2000
+
+* integrated patch by Jacob Schroeder <jacob@quantec.de> to implement
+  flock()-based password file locking
+* minor code tweaks (indentation, unnecessary variables removed)
+* minor README file updates
+* this file
+
+0.1: ?
+
+* Initial release
