@@ -1,0 +1,40 @@
+changelog for pam_pwdfile PAM module - Charl P. Botha <cpbotha@ieee.org>
+$Id: changelog,v 1.7 2001-04-17 21:16:12 cpbotha Exp $
+---------------------------------------------------------------------------
+
+0.7: Tue Apr 17 23:13:34 CEST 2001
+
+* changed error message if user is not found in password file
+* updated to work with > Linux-PAM-0.75 (thanks to Kelly Corbin
+  <kcorbin@theiqgroup.com> for reporting the problem)
+
+0.6: Sat Nov 11 23:51:32 CET 2000
+
+* fixed a stupid bug I introduced when integrating Warwick's patch; tested
+  fine with both DES and MD5 crypts
+
+0.5: Wed Nov  8 01:39:22 CET 2000
+
+* added patch by Warwick Duncan <warwick@chemeng.uct.ac.za> to support MD5 
+  crypted passwords as well
+
+0.4: Tue Aug 29 09:23:23 SAST 2000
+
+* fixed typo in INSTALL (thanks to Quynh Nguyen Anh <quynhna@hotmail.com>)
+
+0.3: Mon Aug 28 09:49:27 SAST 2000
+
+* INSTALL file created.  This explains how to get pam_pwdfile compiled from
+  scratch.
+
+0.2: Mon May 22 22:41:30 SAST 2000
+
+* integrated patch by Jacob Schroeder <jacob@quantec.de> to implement
+  flock()-based password file locking
+* minor code tweaks (indentation, unnecessary variables removed)
+* minor README file updates
+* this file
+
+0.1: ?
+
+* Initial release
