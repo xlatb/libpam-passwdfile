@@ -32,11 +32,11 @@ static void to64(char *s, unsigned long v, int n)
  * Use MD5 for what it is best at...
  */
 
-char *MD5Name(crypt_md5)(const char *pw, const char *salt)
+char *MD5Name(crypt_md5)(const char *pw, const char *salt, int useapr1)
 {
-	const char *magic = "$1$";
-	/* This string is magic for this algorithm.  Having
-	 * it this way, we can get get better later on */
+	const char *bsdmagic = "$1$";  /* Magic signature for this algorithm */
+	const char *apr1magic = "$apr1$";  /* Alternate Apache magic signature */
+	const char *magic = (useapr1) ? apr1magic : bsdmagic;
 	static char passwd[120], *p;
 	static const char *sp, *ep;
 	unsigned char final[16];

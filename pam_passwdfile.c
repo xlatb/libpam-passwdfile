@@ -70,6 +70,7 @@ extern char *bigcrypt(const char *key, const char *salt);
 #define PWDFN_LEN 256
 #define CRYPTED_DESPWD_LEN 13
 #define CRYPTED_MD5PWD_LEN 34
+#define CRYPTED_APR1PWD_LEN 37
 #define CRYPTED_BCPWD_LEN 178
 
 #ifdef DEBUG
@@ -347,27 +348,73 @@ PAM_EXTERN int pam_sm_authenticate(pam_handle_t *pamh, int flags,
     
     temp_result = 0;
     
-    /* Extract the salt and set the passwd length, depending on MD5 or DES */
-    if (strncmp(stored_crypted_password, "$1$", 3) == 0) {
-	D(_pam_log(LOG_ERR,"password hash type is 'md5'"));
-	/* get out the salt into "salt" */
-	strncpy(salt, stored_crypted_password, 11);
-	salt[11] = '\0';
-	stored_crypted_password[CRYPTED_MD5PWD_LEN] = '\0';
-	/* try both md5 crypts */
-	crypted_password = Goodcrypt_md5(password, salt);
-	if (strcmp(crypted_password, stored_crypted_password) == 0)
-	{
-	    temp_result = 1;
+    /* Extract the salt and set the passwd length, depending on hash type */
+    if (strncmp(stored_crypted_password, "$", 1) == 0) {
+	/* Split into fields. Format is: $algo$salt$password */
+	char *saltpos = strchr(stored_crypted_password + 1, '$');  /* Find 2nd $ */
+	if (saltpos == NULL) {
+	    _pam_log(LOG_ERR, "Couldn't find start of 2nd field in encrypted password");
+	    fclose(pwdfile);
+	    return PAM_AUTHINFO_UNAVAIL;
 	}
-	else
-	{
-	    crypted_password = Brokencrypt_md5(password, salt);
+
+	char *passpos = strchr(saltpos + 1, '$');  /* Find 3rd $ */
+	if (passpos == NULL) {
+	    _pam_log(LOG_ERR, "Couldn't find start of 3rd field in encrypted password");
+	    fclose(pwdfile);
+	    return PAM_AUTHINFO_UNAVAIL;
+	}
+
+	char *algo = strndup(stored_crypted_password + 1, saltpos - stored_crypted_password - 1);
+	char *salt = strndup(saltpos + 1, passpos - saltpos - 1);
+
+	if ((strcmp(algo, "1") == 0) || (strcmp(algo, "apr1") == 0)) {
+	    int useapr1 = (strcmp(algo, "apr1") == 0);
+
+	    D(_pam_log(LOG_ERR, "Password hash type is $%s$ (MD5)", algo));
+
+	    if (strlen(salt) != 8)
+	    {
+		_pam_log(LOG_ERR, "Unexpected password salt size");
+		fclose(pwdfile);
+		free(algo);
+		free(salt);
+		return PAM_AUTHINFO_UNAVAIL;
+	    }
+
+	    if (strlen(stored_crypted_password) != ((useapr1) ? CRYPTED_APR1PWD_LEN : CRYPTED_MD5PWD_LEN))
+	    {
+		_pam_log(LOG_ERR, "Unexpected encrypted password size");
+		fclose(pwdfile);
+		free(algo);
+		free(salt);
+		return PAM_AUTHINFO_UNAVAIL;
+	    }
+
+	    /* try both md5 crypts */
+	    crypted_password = Goodcrypt_md5(password, salt, useapr1);
 	    if (strcmp(crypted_password, stored_crypted_password) == 0)
 	    {
 		temp_result = 1;
 	    }
+	    else
+	    {
+		crypted_password = Brokencrypt_md5(password, salt, useapr1);
+		if (strcmp(crypted_password, stored_crypted_password) == 0)
+		{
+		    temp_result = 1;
+		}
+	    }
+	} else {
+	    D(_pam_log(LOG_ERR, "Unknown password hash algorithm $%s$", algo));
+	    fclose(pwdfile);
+	    free(algo);
+	    free(salt);
+	    return PAM_AUTHINFO_UNAVAIL;
 	}
+
+	free(algo);
+	free(salt);
     } else {
 	/* get the salt out into "salt" */
 	strncpy(salt, stored_crypted_password, 2);

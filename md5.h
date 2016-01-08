@@ -19,8 +19,8 @@ void BrokenMD5Update(struct MD5Context *, unsigned const char *, unsigned);
 void BrokenMD5Final(unsigned char digest[16], struct MD5Context *);
 void BrokenMD5Transform(uint32 buf[4], uint32 const in[16]);
 
-char *Goodcrypt_md5(const char *pw, const char *salt);
-char *Brokencrypt_md5(const char *pw, const char *salt);
+char *Goodcrypt_md5(const char *pw, const char *salt, int useapr1);
+char *Brokencrypt_md5(const char *pw, const char *salt, int useapr1);
 
 /*
  * This is needed to make RSAREF happy on some MS-DOS compilers.
